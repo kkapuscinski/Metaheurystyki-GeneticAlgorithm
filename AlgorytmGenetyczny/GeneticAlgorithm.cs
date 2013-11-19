@@ -8,35 +8,44 @@ namespace AlgorytmGenetyczny
 {
     public class GeneticAlgorithm
     {
-        private Random _random = new Random();
-        public delegate double FunctionToOptimize(double[] values);
+        private Random _random;
+        
         public FunctionToOptimize EvaluateFunction;
 
         public int PopulationSize { get; set; }
         public int NumberOfGenerations { get; set; }
         public float MutationRate { get; set; }
+        public float ReproductionRate { get; set; }
+        public float CrossoverRate { get; set; }
         public int GenotypeSize { get; set; }
         public int TournamentSize { get; set; }
         public int EliteSize { get; set; }
         public Genotype BestGenotype { get; set; }
+        public int BestGenotypeGeneration { get; set; }
 
         public List<Genotype> ThisGeneration;
         public List<Genotype> NextGeneration;
 
-        public GeneticAlgorithm(int populationSize, int numberOfGenerations, float mutationRate, int genotypeSize, int tournamentSize, int eliteSize, FunctionToOptimize function)
+        public GeneticAlgorithm(int populationSize, int numberOfGenerations, float mutationRate, float reproductionRate, float crossoverRate, int genotypeSize, int tournamentSize, int eliteSize, FunctionToOptimize function)
         {
             if (function == null) throw new ArgumentNullException("Function can't be null");
             if (populationSize % 2 != 0) throw new ArgumentException("population size must be even");
             if (eliteSize > populationSize / 2) throw new ArgumentOutOfRangeException("eliteSize is too big. must be less than populationSize/2");
-            if (mutationRate >= 1.0 || mutationRate <= 0) throw new ArgumentOutOfRangeException("mutationRate mus be between 0 and 1");
+            if (mutationRate >= 1.0 || mutationRate <= 0) throw new ArgumentOutOfRangeException("mutationRate must be between 0 and 1");
+            if (reproductionRate >= 1.0 || reproductionRate <= 0) throw new ArgumentOutOfRangeException("reproductionRate must be between 0 and 1");
+            if (crossoverRate >= 1.0 || crossoverRate <= 0) throw new ArgumentOutOfRangeException("crossoverRate must be between 0 and 1");
 
             PopulationSize = populationSize;
             NumberOfGenerations = numberOfGenerations;
             MutationRate = mutationRate;
+            ReproductionRate = reproductionRate;
+            CrossoverRate = crossoverRate;
             GenotypeSize = genotypeSize;
             TournamentSize = tournamentSize;
             EliteSize = eliteSize;
             EvaluateFunction = function;
+
+            _random = new Random();
 
         }
 
@@ -51,12 +60,13 @@ namespace AlgorytmGenetyczny
             CreateFirstGeneration();
             RankPopulation(ref ThisGeneration);
             BestGenotype = ThisGeneration.First();
-
+            BestGenotypeGeneration = -1;
             for (int i = 0; i < NumberOfGenerations; i++)
             {
                 if (ThisGeneration.First().FunctionValue < BestGenotype.FunctionValue)
                 {
                     BestGenotype = ThisGeneration.First();
+                    BestGenotypeGeneration = i;
                 }
                 Reproduction();
                 GeneticOperations();
@@ -93,15 +103,17 @@ namespace AlgorytmGenetyczny
         private void Reproduction()
         {
             NextGeneration.Clear();
-            for (int i = 0; i < PopulationSize/2; i++)
+
+            while (NextGeneration.Count < PopulationSize)
             {
                 var parent1 = TournamentSelection();
                 var parent2 = TournamentSelection();
-
-                var childrens = parent1.Crossover(parent2);
-
-                NextGeneration.Add(childrens[0]);
-                NextGeneration.Add(childrens[1]);
+                if (_random.NextDouble() < ReproductionRate)
+                {
+                    var childrens = parent1.Crossover(parent2, CrossoverRate);
+                    NextGeneration.Add(childrens[0]);
+                    NextGeneration.Add(childrens[1]);
+                }
             }
         }
 

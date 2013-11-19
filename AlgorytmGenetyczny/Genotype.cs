@@ -68,14 +68,14 @@ namespace AlgorytmGenetyczny
         }
 
 
-        public Genotype[] Crossover(Genotype parent2)
+        public Genotype[] Crossover(Genotype parent2, float crossoverRate)
         {
             if (this.Length != parent2.Length) throw new Exception("Can't Crossover genotypes with diffrent length");
 
             var copyArray = new BitArray(Length * 32);
             for (int i = 0; i < copyArray.Length; i++)
             {
-                copyArray[i] = _random.NextDouble() > 0.5 ? true : false;
+                copyArray[i] = _random.NextDouble() < crossoverRate ? true : false;
             }
 
             var child1 = new Genotype(this.Length, false);
@@ -98,7 +98,7 @@ namespace AlgorytmGenetyczny
 
         }
 
-        public void Mutate(double mutationRate)
+        public void Mutate(float mutationRate)
         {
             for (int i = 0; i < Length * 32; i++)
             {
