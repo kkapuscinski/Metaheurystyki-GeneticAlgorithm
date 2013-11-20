@@ -8,7 +8,7 @@ namespace AlgorytmGenetyczny
 {
     public class GeneticAlgorithm
     {
-        private Random _random;
+        public Random random;
         
         public FunctionToOptimize EvaluateFunction;
 
@@ -45,11 +45,13 @@ namespace AlgorytmGenetyczny
             EliteSize = eliteSize;
             EvaluateFunction = function;
 
-            _random = new Random();
+            random = new Random();
 
         }
 
-
+        /// <summary>
+        /// uruchomienie algorytmu
+        /// </summary>
         public void Run()
         {
 
@@ -76,15 +78,20 @@ namespace AlgorytmGenetyczny
         }
 
         
-
+        /// <summary>
+        /// Tworzonie pierwszej generacji
+        /// </summary>
         private void CreateFirstGeneration()
         {
             for (int i = 0; i < PopulationSize; i++)
             {
-                ThisGeneration.Add(new Genotype(GenotypeSize));
+                ThisGeneration.Add(new Genotype(GenotypeSize, this));
             }
         }
-
+        /// <summary>
+        /// Szeregoawnie populacji według wartosci funkcji (pierwszy element jest najelpszy)
+        /// </summary>
+        /// <param name="generation">lista genotypów do szeregowania</param>
         private void RankPopulation(ref List<Genotype> generation)
         {
             foreach (var individual in generation)
@@ -100,6 +107,9 @@ namespace AlgorytmGenetyczny
 
         }
 
+        /// <summary>
+        /// Reprodukcja genotypów
+        /// </summary>
         private void Reproduction()
         {
             NextGeneration.Clear();
@@ -108,7 +118,7 @@ namespace AlgorytmGenetyczny
             {
                 var parent1 = TournamentSelection();
                 var parent2 = TournamentSelection();
-                if (_random.NextDouble() < ReproductionRate)
+                if (random.NextDouble() < ReproductionRate)
                 {
                     var childrens = parent1.Crossover(parent2, CrossoverRate);
                     NextGeneration.Add(childrens[0]);
@@ -117,18 +127,25 @@ namespace AlgorytmGenetyczny
             }
         }
 
+        /// <summary>
+        /// Selekcja turniejowa
+        /// </summary>
+        /// <returns></returns>
         private Genotype TournamentSelection()
         {
             var tmpGenotypes = new List<Genotype>();
             for (int i = 0; i < TournamentSize; i++)
             {
-                tmpGenotypes.Add(ThisGeneration[_random.Next(PopulationSize)]);
+                tmpGenotypes.Add(ThisGeneration[random.Next(PopulationSize)]);
             }
             tmpGenotypes = tmpGenotypes.OrderByDescending(t => t.FunctionValue).ToList();
 
             return tmpGenotypes.First();
         }
 
+        /// <summary>
+        /// Wykonanie operacji genetycznych (mutacja)
+        /// </summary>
         private void GeneticOperations()
         {
             for (int i = 0; i < PopulationSize; i++)
@@ -137,6 +154,9 @@ namespace AlgorytmGenetyczny
             }
         }
 
+        /// <summary>
+        /// sukcesja.  wybranie kol
+        /// </summary>
         private void Succession()
         {
             var tmpGeneration = new List<Genotype>(PopulationSize);

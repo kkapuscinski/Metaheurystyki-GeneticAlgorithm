@@ -28,16 +28,7 @@ namespace AlgorytmGenetyczny
 
         static void Main(string[] args)
         {
-            var x = new bool[] { true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true };
-            int test = 0;
-            for (int i = 0; i < x.Count(); i++)
-            {
-                if (x[i])
-                {
-                    test = test + (int)Math.Pow(2, (double)i);
-                }
-            }
-            var z = ((test * 1.19209296656209) /100000) - 100;
+
             int populationSize = 100;
             int numberOfGenerations = 1000;
             float mutationRate = 0.8F;
@@ -58,7 +49,7 @@ namespace AlgorytmGenetyczny
                     Console.WriteLine("2. ilość generacji integer");
                     Console.WriteLine("3. prawdopodobieństwo mutacji float np. 0,8");
                     Console.WriteLine("4. prawdopodobieństwo reprodukcji float");
-                    Console.WriteLine("5. prawdopodobieństwo float");
+                    Console.WriteLine("5. prawdopodobieństwo krzyżowania float");
                     Console.WriteLine("6. rozmiar genotypu (ilość wymiarów funkcji) integer");
                     Console.WriteLine("7. Wielkość turnieju integer");
                     Console.WriteLine("8. Wielkość elity integer");

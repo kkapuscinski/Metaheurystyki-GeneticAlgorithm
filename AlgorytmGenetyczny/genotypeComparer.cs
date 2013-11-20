@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace AlgorytmGenetyczny
 {
+    /// <summary>
+    /// klasa służąca do porównywania genotypów po wartości funkcji
+    /// </summary>
     public class GenoTypeComparer : IComparer<Genotype>
     {
         public GenoTypeComparer()

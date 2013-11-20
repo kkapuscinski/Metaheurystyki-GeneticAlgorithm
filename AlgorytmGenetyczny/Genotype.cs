@@ -7,17 +7,27 @@ using System.Threading.Tasks;
 
 namespace AlgorytmGenetyczny
 {
+    /// <summary>
+    /// klasa opisująca genotyp
+    /// </summary>
     public class Genotype
     {
-        private static Random _random = new Random();
 
         public BitArray Genes { get; set; }
         public int Length { get; set; }
         public Double FunctionValue {get; set;}
+        public GeneticAlgorithm geneticAlgorithm {get; set;}
 
-        public Genotype(int length, bool generateRandomGenes = true)
+        /// <summary>
+        /// konstruktor tworzy genotyp i ewentualnie losuje wartości genów ( przy krzyżowaniu wstrzykiwane sa geny)
+        /// </summary>
+        /// <param name="length">długość genotypu( ilość wymiarów funkcji)</param>
+        /// <param name="algorithm">instancja algorytmu dla którego wykownywana jest optymalizacja</param>
+        /// <param name="generateRandomGenes">czy losować geny</param>
+        public Genotype(int length, GeneticAlgorithm algorithm, bool generateRandomGenes = true)
         {
             Length = length;
+            geneticAlgorithm = algorithm;
             if (generateRandomGenes)
             {
                 Genes = GenerateGenes();
@@ -28,46 +38,59 @@ namespace AlgorytmGenetyczny
             }
         }
 
-
+        /// <summary>
+        /// Pobranie wartości punktów funkcji
+        /// </summary>
+        /// <returns></returns>
         public double[] GetValues()
         {
             var doubleNumbers = new double[Length];
-            var numbers = new int[Length];
-            Genes.CopyTo(numbers, 0);
+            var bytearray = new byte[4 * Length];
+            Genes.CopyTo(bytearray, 0);
             for (int i = 0; i < Length; i++)
             {
-                var value = numbers[i] / 10000000.0;
-                if (value > 100.0) value = 100.0;
-                if (value < -100.0) value = -100.0;
-                doubleNumbers[i] = value;
+                var singleByteValue = bytearray.Skip(i * Length).Take(4).ToArray();
+                var rawValue = BitConverter.ToUInt32(singleByteValue, 0);
+                doubleNumbers[i] = ((rawValue * 0.4656612874161595) / 10000000) - 100; //skalowanie do dziedziny
             }
             return doubleNumbers;
         }
 
+        /// <summary>
+        /// Generowanie losowych genów
+        /// </summary>
+        /// <returns></returns>
         private BitArray GenerateGenes()
         {
             var byteList = new List<byte>();
             for (int i = 0; i < Length; i++)
             {
-                var randInt = _random.Next(-1000000000, 1000000000);
-                var intByte = BitConverter.GetBytes(randInt);
-                foreach (var singleByte in intByte)
-                {
-                    byteList.Add(singleByte);
-                }
+                var tmpByteArray = new byte[4];
+                geneticAlgorithm.random.NextBytes(tmpByteArray);
+
+                byteList.AddRange(tmpByteArray);
             }
             return new BitArray(byteList.ToArray());
 
         }
 
+        /// <summary>
+        /// wykonanie kopii Genotypu
+        /// </summary>
+        /// <returns></returns>
         public Genotype Copy()
         {
-            var copiedGenotype = new Genotype(this.Length, false);
+            var copiedGenotype = new Genotype(this.Length, this.geneticAlgorithm, false);
             copiedGenotype.Genes = this.Genes;
             return copiedGenotype;
         }
 
-
+        /// <summary>
+        /// Krzyżowanie genotypu
+        /// </summary>
+        /// <param name="parent2">genotyp z którym ma nastąpić krzyżowanie</param>
+        /// <param name="crossoverRate">współczynnik krzyżowania</param>
+        /// <returns>tablica dziedzi genotypów</returns>
         public Genotype[] Crossover(Genotype parent2, float crossoverRate)
         {
             if (this.Length != parent2.Length) throw new Exception("Can't Crossover genotypes with diffrent length");
@@ -75,11 +98,11 @@ namespace AlgorytmGenetyczny
             var copyArray = new BitArray(Length * 32);
             for (int i = 0; i < copyArray.Length; i++)
             {
-                copyArray[i] = _random.NextDouble() < crossoverRate ? true : false;
+                copyArray[i] = geneticAlgorithm.random.NextDouble() < crossoverRate ? true : false;
             }
 
-            var child1 = new Genotype(this.Length, false);
-            var child2 = new Genotype(this.Length, false);
+            var child1 = new Genotype(this.Length, this.geneticAlgorithm, false);
+            var child2 = new Genotype(this.Length, this.geneticAlgorithm, false);
             for (int i = 0; i < copyArray.Length; i++)
             {
                 if (copyArray[i])
@@ -98,11 +121,15 @@ namespace AlgorytmGenetyczny
 
         }
 
+        /// <summary>
+        /// Mutacja genotypu
+        /// </summary>
+        /// <param name="mutationRate">współczynnik mutacji genotypu</param>
         public void Mutate(float mutationRate)
         {
             for (int i = 0; i < Length * 32; i++)
             {
-                if (_random.NextDouble() < mutationRate)
+                if (geneticAlgorithm.random.NextDouble() < mutationRate)
                     Genes[i] = Genes[i] ? false : true;
             }
         }
