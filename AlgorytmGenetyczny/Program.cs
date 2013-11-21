@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -23,7 +24,7 @@ namespace AlgorytmGenetyczny
                 powValues.Add(Math.Pow(value, 2));
             }
 
-            double f1 = 0.5 + (((Math.Pow(Math.Sin(Math.Sqrt(powValues.Sum())), 2) - 0.5) / Math.Pow(1 + 0.001 * (powValues.Sum()), 2)));
+            double f1 = 0.5 + ((Math.Pow(Math.Sin(Math.Sqrt(powValues.Sum())), 2) - 0.5) / Math.Pow(1 + 0.001 * (powValues.Sum()), 2));
             return f1;
         }
 
@@ -83,26 +84,27 @@ namespace AlgorytmGenetyczny
             var function = new FunctionToOptimize(Function);
             var bestGenotypes = new List<Genotype>();
             var bestGenotypesGeneration = new List<int>();
-            var worstGenotypes = new List<Genotype>();
-            var worstGenotypesGeneration = new List<int>();
             for (int i = 0; i < 10; i++)
             {
                 var algorithm = new GeneticAlgorithm(populationSize, numberOfGenerations, mutationRate, reproductionRate, crossoverRate, genotypeSize, tournamentSize, eliteSize, function);
                 algorithm.Run();
                 bestGenotypes.Add(algorithm.BestGenotype);
                 bestGenotypesGeneration.Add(algorithm.BestGenotypeGeneration);
-                worstGenotypes.Add(algorithm.WorstGenotype);
-                worstGenotypesGeneration.Add(algorithm.WorstGenotypeGeneration);
                 
             }
 
-            
 
+            Console.WriteLine("Generacja najlepszego Genotypu; Wartość najlepszego Genotypu;");
             for (int i = 0; i < 10; i++)
 			{
-                Console.WriteLine("Generacja najlepszego Genotypu; Wartość najlepszego Genotypu; Generacja najgorszego Genotypu; Wartość najgorszego Genotypu;");
-                Console.WriteLine("{0};{1};{2};{3}", bestGenotypesGeneration[i], bestGenotypes[i].FunctionValue.ToString("0.000000000"), worstGenotypesGeneration[i], worstGenotypes[i].FunctionValue.ToString("0.000000000"));
+                
+                Console.WriteLine("{0};{1}", bestGenotypesGeneration[i], bestGenotypes[i].FunctionValue.ToString("0.000000000"));
 			}
+
+            Console.WriteLine("Średnia wartość;Nalepsza wartość;Najgorsza wartość");
+            Console.WriteLine("{0};{1};{2}", bestGenotypes.Average(g => g.FunctionValue), bestGenotypes.Min(g => g.FunctionValue), bestGenotypes.Max(g => g.FunctionValue));
+            Console.WriteLine("Średnia ilość epok;Nalepsza ilość epok;Najgorsza ilość epok");
+            Console.WriteLine("{0};{1};{2}", bestGenotypesGeneration.Average(), bestGenotypesGeneration.Min(), bestGenotypesGeneration.Max());
             sw.Flush();
             fs.Flush(true);
             fs.Close();
