@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace AlgorytmGenetyczny
     class Program
     {
 
-        public static double theActualFunction(double[] values)
+        public static double Function(double[] values)
         {
             
 
@@ -28,7 +29,11 @@ namespace AlgorytmGenetyczny
 
         static void Main(string[] args)
         {
-
+            FileStream fs = new FileStream(DateTime.Now.ToString("HH_mm_ss") + ".csv", FileMode.Create);
+            StreamWriter sw = new StreamWriter(fs);
+            Console.SetOut(sw);
+            
+            
             int populationSize = 100;
             int numberOfGenerations = 1000;
             float mutationRate = 0.8F;
@@ -75,32 +80,32 @@ namespace AlgorytmGenetyczny
 
             }
 
-            var function = new FunctionToOptimize(theActualFunction);
+            var function = new FunctionToOptimize(Function);
             var bestGenotypes = new List<Genotype>();
             var bestGenotypesGeneration = new List<int>();
+            var worstGenotypes = new List<Genotype>();
+            var worstGenotypesGeneration = new List<int>();
             for (int i = 0; i < 10; i++)
             {
                 var algorithm = new GeneticAlgorithm(populationSize, numberOfGenerations, mutationRate, reproductionRate, crossoverRate, genotypeSize, tournamentSize, eliteSize, function);
                 algorithm.Run();
                 bestGenotypes.Add(algorithm.BestGenotype);
                 bestGenotypesGeneration.Add(algorithm.BestGenotypeGeneration);
+                worstGenotypes.Add(algorithm.WorstGenotype);
+                worstGenotypesGeneration.Add(algorithm.WorstGenotypeGeneration);
                 
             }
 
+            
+
             for (int i = 0; i < 10; i++)
 			{
-                Console.WriteLine("Generacja najelpszego Genotypu: {0}", bestGenotypesGeneration[i]);
-                Console.WriteLine("Wartość: {0}", bestGenotypes[i].FunctionValue.ToString("0.000000000"));
-                foreach (var value in bestGenotypes[i].GetValues())
-	            {
-                    Console.Write("Punkt: {0} ", value.ToString("0.000000000")); 
-	            }
-                Console.WriteLine();
-
+                Console.WriteLine("Generacja najlepszego Genotypu; Wartość najlepszego Genotypu; Generacja najgorszego Genotypu; Wartość najgorszego Genotypu;");
+                Console.WriteLine("{0};{1};{2};{3}", bestGenotypesGeneration[i], bestGenotypes[i].FunctionValue.ToString("0.000000000"), worstGenotypesGeneration[i], worstGenotypes[i].FunctionValue.ToString("0.000000000"));
 			}
-            
-            Console.ReadLine();
-            
+            sw.Flush();
+            fs.Flush(true);
+            fs.Close();
 
         }
     }
