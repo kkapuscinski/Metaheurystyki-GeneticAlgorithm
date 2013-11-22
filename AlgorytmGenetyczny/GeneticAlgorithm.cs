@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace AlgorytmGenetyczny
 {
+    /// <summary>
+    /// Klasa reprezentująca algorytm genetyczny
+    /// </summary>
     public class GeneticAlgorithm
     {
         public Random random;
@@ -26,6 +29,18 @@ namespace AlgorytmGenetyczny
         public List<Genotype> ThisGeneration;
         public List<Genotype> NextGeneration;
 
+        /// <summary>
+        /// Konstruktor inicjalizujący parametry algorytmu
+        /// </summary>
+        /// <param name="populationSize">Rozmiar populacji</param>
+        /// <param name="numberOfGenerations">Ilość Generacji</param>
+        /// <param name="mutationRate">współczynnik mutacji</param>
+        /// <param name="reproductionRate">Współczynnik reprodukcji</param>
+        /// <param name="crossoverRate">Współczynnik krzyżowania</param>
+        /// <param name="genotypeSize">Ilość wymiarów badanej funkcji</param>
+        /// <param name="tournamentSize">Wielkość turnieju</param>
+        /// <param name="eliteSize">Wielkość elity</param>
+        /// <param name="function">Delegat wskazujący na badaną funkcję</param>
         public GeneticAlgorithm(int populationSize, int numberOfGenerations, float mutationRate, float reproductionRate, float crossoverRate, int genotypeSize, int tournamentSize, int eliteSize, FunctionToOptimize function)
         {
             if (function == null) throw new ArgumentNullException("Function can't be null");
@@ -45,16 +60,16 @@ namespace AlgorytmGenetyczny
             EliteSize = eliteSize;
             EvaluateFunction = function;
 
+            //tworzenie nowego generatora pseudolosowego z nowym ziarnem(konstruktor domyślny bierze pod uwagę aktualną datę
             random = new Random();
 
         }
 
         /// <summary>
-        /// uruchomienie algorytmu
+        /// metoda uruchomiająca algorytm
         /// </summary>
         public void Run()
         {
-
             ThisGeneration = new List<Genotype>(PopulationSize);
             NextGeneration = new List<Genotype>(PopulationSize);
             BestGenotype = null;
@@ -63,6 +78,7 @@ namespace AlgorytmGenetyczny
             RankPopulation(ref ThisGeneration);
             for (int i = 0; i < NumberOfGenerations; i++)
             {
+                // zapis najlepszego osobnika
                 if (BestGenotype == null || ThisGeneration.First().FunctionValue < BestGenotype.FunctionValue)
                 {
                     BestGenotype = ThisGeneration.First();
@@ -70,7 +86,6 @@ namespace AlgorytmGenetyczny
                 }
 
                 Reproduction();
-                GeneticOperations();
                 RankPopulation(ref NextGeneration);
                 Succession();
             }
@@ -78,7 +93,7 @@ namespace AlgorytmGenetyczny
 
         
         /// <summary>
-        /// Tworzonie pierwszej generacji
+        /// Metoda tworząca pierwszą generację losowo
         /// </summary>
         private void CreateFirstGeneration()
         {
@@ -88,26 +103,23 @@ namespace AlgorytmGenetyczny
             }
         }
         /// <summary>
-        /// Szeregoawnie populacji według wartosci funkcji (pierwszy element jest najelpszy)
+        /// Metoda Szeregująca populację według wartosci funkcji (pierwszy element jest najelpszy)
         /// </summary>
         /// <param name="generation">lista genotypów do szeregowania</param>
         private void RankPopulation(ref List<Genotype> generation)
         {
+            // ewaluacja funkcji
             foreach (var individual in generation)
             {
                 individual.FunctionValue = EvaluateFunction(individual.GetValues());
             }
-            for (int i = 0; i < PopulationSize; i++)
-            {
-                var genotype = ThisGeneration[i];
-                genotype.FunctionValue = EvaluateFunction(genotype.GetValues());
-            }
+            // sortowanie listy
             generation.Sort(new GenoTypeComparer());
 
         }
 
         /// <summary>
-        /// Reprodukcja genotypów
+        /// Metoda wykonująca reprodukcję osobników
         /// </summary>
         private void Reproduction()
         {
@@ -129,12 +141,17 @@ namespace AlgorytmGenetyczny
                     NextGeneration.Add(parent2);
                 }
             }
+
+            for (int i = 0; i < PopulationSize; i++)
+            {
+                NextGeneration[i].Mutate(MutationRate);
+            }
         }
 
         /// <summary>
-        /// Selekcja turniejowa
+        /// Metoda wykonująca selekcję turniejową
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Zwraca osobnika zwycięskiego</returns>
         private Genotype TournamentSelection()
         {
             var tmpGenotypes = new List<Genotype>();
@@ -148,25 +165,17 @@ namespace AlgorytmGenetyczny
         }
 
         /// <summary>
-        /// Wykonanie operacji genetycznych (mutacja)
-        /// </summary>
-        private void GeneticOperations()
-        {
-            for (int i = 0; i < PopulationSize; i++)
-            {
-                NextGeneration[i].Mutate(MutationRate);
-            }
-        }
-
-        /// <summary>
-        /// sukcesja.  wybranie kol
+        /// Metoda wykonująca sukcesję
         /// </summary>
         private void Succession()
         {
             var tmpGeneration = new List<Genotype>(PopulationSize);
+            // pobieram elitę z aktualnej generacji
             tmpGeneration.AddRange(ThisGeneration.Take(EliteSize));
+            // pobieram pozostałe osobniniki
             tmpGeneration.AddRange(NextGeneration.Take(PopulationSize - EliteSize));
             tmpGeneration.Sort(new GenoTypeComparer());
+            // przepisuję osobników do następnej pętli
             ThisGeneration = tmpGeneration;
         }
 

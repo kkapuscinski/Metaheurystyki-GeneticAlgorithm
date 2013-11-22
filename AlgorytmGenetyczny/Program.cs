@@ -13,11 +13,13 @@ namespace AlgorytmGenetyczny
 
     class Program
     {
-
+        /// <summary>
+        /// Badana funkcja
+        /// </summary>
+        /// <param name="values">tablica wartości wymiarów</param>
+        /// <returns></returns>
         public static double Function(double[] values)
         {
-            
-
             List<double> powValues = new List<double>();
             foreach (var value in values)
             {
@@ -30,11 +32,7 @@ namespace AlgorytmGenetyczny
 
         static void Main(string[] args)
         {
-            FileStream fs = new FileStream(DateTime.Now.ToString("HH_mm_ss") + ".csv", FileMode.Create);
-            StreamWriter sw = new StreamWriter(fs);
-            Console.SetOut(sw);
-            
-            
+            // domyślne parametry
             int populationSize = 100;
             int numberOfGenerations = 1000;
             float mutationRate = 0.8F;
@@ -44,7 +42,7 @@ namespace AlgorytmGenetyczny
             int tournamentSize = 10;
             int eliteSize = 20;
 
-
+            // czytanie parametrów podanych przy wywołaniu
             var argsCount = args.Count();
             if (argsCount >= 1)
             {
@@ -80,18 +78,25 @@ namespace AlgorytmGenetyczny
 
 
             }
+            // zmienne tymczasowe
             var function = new FunctionToOptimize(Function);
             var bestGenotypes = new List<Genotype>();
             var bestGenotypesGeneration = new List<int>();
+            // wykonanie algorytmu dziesięciokrotnie
             for (int i = 0; i < 10; i++)
             {
                 var algorithm = new GeneticAlgorithm(populationSize, numberOfGenerations, mutationRate, reproductionRate, crossoverRate, genotypeSize, tournamentSize, eliteSize, function);
                 algorithm.Run();
+                // zapis najlepszych osobników
                 bestGenotypes.Add(algorithm.BestGenotype);
                 bestGenotypesGeneration.Add(algorithm.BestGenotypeGeneration);
                 
             }
 
+            // zapis do pliku
+            FileStream fs = new FileStream(DateTime.Now.ToString("HH_mm_ss") + ".csv", FileMode.Create);
+            StreamWriter sw = new StreamWriter(fs);
+            Console.SetOut(sw);
 
             Console.WriteLine("Generacja najlepszego Genotypu; Wartość najlepszego Genotypu;");
             for (int i = 0; i < 10; i++)

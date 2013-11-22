@@ -39,9 +39,9 @@ namespace AlgorytmGenetyczny
         }
 
         /// <summary>
-        /// Pobranie wartości punktów funkcji
+        /// Metoda Pobierająca wartości punktów funkcji
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Tablica wartości wymiarów funkcji</returns>
         public double[] GetValues()
         {
             var doubleNumbers = new double[Length];
@@ -49,8 +49,8 @@ namespace AlgorytmGenetyczny
             Genes.CopyTo(bytearray, 0);
             for (int i = 0; i < Length; i++)
             {
-                var singleByteValue = bytearray.Skip(i * Length).Take(4).ToArray();
-                var rawValue = BitConverter.ToUInt32(singleByteValue, 0);
+                var singleByteValue = bytearray.Skip(i * Length).Take(4).ToArray(); // konwersja na bajty
+                var rawValue = BitConverter.ToUInt32(singleByteValue, 0); // konwersja na Uint
                 doubleNumbers[i] = ((rawValue * 0.4656612874161595) / 10000000) - 100; //skalowanie do dziedziny
 
             }
@@ -58,9 +58,9 @@ namespace AlgorytmGenetyczny
         }
 
         /// <summary>
-        /// Generowanie losowych genów
+        /// Metoda Generująca geny
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Tablica genów</returns>
         private BitArray GenerateGenes()
         {
             var byteList = new List<byte>();
@@ -76,7 +76,7 @@ namespace AlgorytmGenetyczny
         }
 
         /// <summary>
-        /// wykonanie kopii Genotypu
+        /// Metoda Wykonuje kopię Genotypu
         /// </summary>
         /// <returns></returns>
         public Genotype Copy()
@@ -91,7 +91,7 @@ namespace AlgorytmGenetyczny
         /// </summary>
         /// <param name="parent2">genotyp z którym ma nastąpić krzyżowanie</param>
         /// <param name="crossoverRate">współczynnik krzyżowania</param>
-        /// <returns>tablica dziedzi genotypów</returns>
+        /// <returns>tablica dzieci </returns>
         public Genotype[] Crossover(Genotype parent2, float crossoverRate)
         {
             if (this.Length != parent2.Length) throw new Exception("Can't Crossover genotypes with diffrent length");
@@ -134,8 +134,5 @@ namespace AlgorytmGenetyczny
                     Genes[i] = Genes[i] ? false : true;
             }
         }
-
-
-
     }
 }
