@@ -80,7 +80,6 @@ namespace AlgorytmGenetyczny
 
 
             }
-
             var function = new FunctionToOptimize(Function);
             var bestGenotypes = new List<Genotype>();
             var bestGenotypesGeneration = new List<int>();
