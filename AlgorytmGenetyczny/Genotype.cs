@@ -45,12 +45,21 @@ namespace AlgorytmGenetyczny
         public double[] GetValues()
         {
             var doubleNumbers = new double[Length];
-            var bytearray = new byte[4 * Length];
-            Genes.CopyTo(bytearray, 0);
+            //var bytearray = new byte[4 * Length];
+            //Genes.CopyTo(bytearray, 0);
             for (int i = 0; i < Length; i++)
             {
-                var singleByteValue = bytearray.Skip(i * Length).Take(4).ToArray();
-                var rawValue = BitConverter.ToUInt32(singleByteValue, 0);
+                uint rawValue = 0;
+                for (int j = 0; j < 32; j++)
+                {
+                    if (Genes[j + 32*i])
+                    {
+                        rawValue = rawValue + (uint)(2 ^ j);
+                    }
+                    
+                }
+                //var singleByteValue = bytearray.Skip(i * Length).Take(4).ToArray();
+                //var rawValue = BitConverter.ToUInt32(singleByteValue, 0);
                 doubleNumbers[i] = ((rawValue * 0.4656612874161595) / 10000000) - 100; //skalowanie do dziedziny
             }
             return doubleNumbers;
