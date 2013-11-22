@@ -21,9 +21,7 @@ namespace AlgorytmGenetyczny
         public int TournamentSize { get; set; }
         public int EliteSize { get; set; }
         public Genotype BestGenotype { get; set; }
-        public Genotype WorstGenotype { get; set; }
         public int BestGenotypeGeneration { get; set; }
-        public int WorstGenotypeGeneration { get; set; }
 
         public List<Genotype> ThisGeneration;
         public List<Genotype> NextGeneration;
@@ -71,11 +69,6 @@ namespace AlgorytmGenetyczny
                     BestGenotypeGeneration = i;
                 }
 
-                if (WorstGenotype == null || ThisGeneration.Last().FunctionValue > WorstGenotype.FunctionValue)
-                {
-                    WorstGenotype = ThisGeneration.Last();
-                    WorstGenotypeGeneration = i;
-                }
                 Reproduction();
                 GeneticOperations();
                 RankPopulation(ref NextGeneration);
